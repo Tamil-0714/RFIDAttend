@@ -35,7 +35,7 @@
       .regTD{
         cursor: pointer;
       }
-      .reg-popper{
+      .reg-popper, .logout{
         padding: 8px 12px;
         border: 1px solid black;
         font-size: 1.08em;
@@ -44,7 +44,7 @@
         cursor: pointer;
         transition: 0.3s ease-in;
       }
-      .reg-popper:hover{
+      .reg-popper:hover, .logout:hover{
         background-color: #000;
         color: white;
         transition: 0.3s ease-in-out;
@@ -57,6 +57,7 @@
   <body>
     <h2>Attendance Records</h2>
     <button class="reg-popper" onclick="testFetch()">Show Reg no</button>
+    <button class="logout" >Log Out</button>
     <div class="table-wrapper">
       <table class="reg_no_table">
         <thead>
@@ -232,11 +233,11 @@
             // Create cells for each property and append them to the row
 
             const dateStamp = document.createElement("td");
-            dateStamp.textContent = data.date_stamp;
+            dateStamp.textContent = formatDate(data.date_stamp);
             tableRow.appendChild(dateStamp);
             
             const timeStamp = document.createElement("td");
-            timeStamp.textContent = data.time_stamp;
+            timeStamp.textContent = formatTime(data.time_stamp);
             tableRow.appendChild(timeStamp);
 
             const dayOrder = document.createElement("td");
