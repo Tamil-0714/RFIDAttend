@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance Table</title>
+    <style>
+      .table-wrapper {
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: baseline;
+      }
+      .reg_no_table {
+        width: 20%;
+        border-collapse: collapse;
+      }
+      .attePopUp {
+        border-collapse: collapse;
+        margin: 20px 0 0 0;
+        width: 80%;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        /* cursor: pointer; */
+        transition: 0.2s ease-in;
+        text-align: center;
+      }
+      .regTD{
+        cursor: pointer;
+      }
+      .reg-popper{
+        padding: 8px 12px;
+        border: 1px solid black;
+        font-size: 1.08em;
+        margin-bottom: 10px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: 0.3s ease-in;
+      }
+      .reg-popper:hover{
+        background-color: #000;
+        color: white;
+        transition: 0.3s ease-in-out;
+      }
+      .regTH {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Attendance Records</h2>
+    <button class="reg-popper" onclick="testFetch()">Show Reg no</button>
+    <div class="table-wrapper">
+      <table class="reg_no_table">
+        <thead>
+          <tr>
+            <th class="regTH"><center>Registration Number</center></th>
+            <!--  -->
+          </tr>
+        </thead>
+        <tbody id="attendance-table-body">
+          <!-- Data will be populated here -->
+        </tbody>
+      </table>
+
+      <table class="attePopUp">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Day Order</th>
+            <th>Category</th>
+            <th>Attendance Status</th>
+          </tr>
+        </thead>
+        <tbody id="popup-table-body">
+          <!-- <tr>
+            <td>Everything</td>
+            <td>204751</td>
+            <td>270924</td>
+            <td>dont care</td>
+            <td>enjoy</td>
+          </tr> -->
+        </tbody>
+      </table>
+    </div>
+    <!-- 
+    [
+    {
+        "attendanceStatus": "Everything",
+        "time_stamp": "204751",
+        "date_stamp": "270924",
+        "day_order": "dont care",
+        "category": "enjoy"
+    },
+    {
+        "attendanceStatus": "second",
+        "time_stamp": "205005",
+        "date_stamp": "270924",
+        "day_order": "be full",
+        "category": "dont care"
+    },
+    {
+        "attendanceStatus": "nice",
+        "time_stamp": "205350",
+        "date_stamp": "270924",
+        "day_order": "fuck",
+        "category": "dick"
+    }
+    ]
+    -->
+
+    <script>
+      // JSON Data
+      // const data = [];
+      async function fetchData() {
+        var requestOptions = {
+          method: "GET",
+          credentials: "include", // Include cookies in the request
+        };
+
+        try {
+          // Correct fetch call with cookies
+          const resData = await fetch(
+            "http://127.0.0.1:3002/attendData",
+            requestOptions
+          );
+
+          // Correct json() method usage
+          const response = await resData.json();
+          if (response.message === "Session expired") {
+            window.location.href = "http://127.0.0.1:5500/login.html";
+            return;
+          }
+          // console.log("from fetch data", response);
+          // data = response;
+          return response;
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+      let data;
+      async function testFetch() {
+        console.log("logged");
+        // await fetchData();
+        data = await fetchData();
+        populateTable();
+      }
+      // Function to format date
+      function formatDate(dateStr) {
+        const day = dateStr.slice(0, 2);
+        const month = dateStr.slice(2, 4);
+        const year = "20" + dateStr.slice(4, 6);
+        return `${day}/${month}/${year}`;
+      }
+
+      // Function to format time
+      function formatTime(timeStr) {
+        const hours = timeStr.slice(0, 2);
+        const minutes = timeStr.slice(2, 4);
+        const seconds = timeStr.slice(4, 6);
+        return `${hours}:${minutes}:${seconds}`;
+      }
+
+      // Function to populate the table
+      function populateTable() {
+        const tableBody = document.getElementById("attendance-table-body");
+        tableBody.innerHTML = "";
+        data.forEach((student) => {
+          // Create cells for the row
+          const row = document.createElement("tr");
+          const regNoCell = document.createElement("td");
+          regNoCell.classList.add("regTD");
+          clickerPopper(regNoCell);
+          regNoCell.textContent = student.reg_no.toUpperCase();
+          row.appendChild(regNoCell);
+          tableBody.appendChild(row);
+        });
+      }
+      function getJSONDataByRegNo(regNo) {
+        const student = data.find((item) => item.reg_no === regNo);
+        return student ? student.JSONData : null;
+      }
+      let lastClickedElement = null;
+      function clickerPopper(element) {
+        // element.backgroundColor = "white";
+        element.addEventListener("click", (e) => {
+          const regNo = e.target.innerHTML.toLowerCase();
+          if (lastClickedElement) {
+            lastClickedElement.style.backgroundColor = "white";
+          }
+          e.target.style.backgroundColor = "#cecece";
+          lastClickedElement = e.target;
+          const JSONDATA = getJSONDataByRegNo(regNo);
+          const popUpTableBody = document.getElementById("popup-table-body");
+          popUpTableBody.innerHTML = "";
+          // JSONDATA.forEach((e) => {
+          //   console.log(e);
+          //   const tableRow = document.createElement("tr");
+          //   const atteSts = document.createElement("td");
+          //   atteSts.textContent = e.attendanceStatus;
+          //   tableRow.appendChild(atteSts);
+
+          //   const timeStamp = document.createElement("td");
+          //   atteSts.textContent = e.time_stamp;
+          //   tableRow.appendChild(timeStamp);
+
+          //   const dateStamp = document.createElement("td");
+          //   atteSts.textContent = e.date_stamp;
+          //   tableRow.appendChild(dateStamp);
+
+          //   const dayOrder = document.createElement("td");
+          //   atteSts.textContent = e.day_order;
+          //   tableRow.appendChild(dayOrder);
+
+          //   const cate = document.createElement("td");
+          //   atteSts.textContent = e.category;
+          //   tableRow.appendChild(cate);
+
+          //   popUpTableBody.appendChild(tableRow);
+          // });
+          JSONDATA.forEach((data) => {
+            const tableRow = document.createElement("tr");
+
+            // Create cells for each property and append them to the row
+
+            const dateStamp = document.createElement("td");
+            dateStamp.textContent = data.date_stamp;
+            tableRow.appendChild(dateStamp);
+            
+            const timeStamp = document.createElement("td");
+            timeStamp.textContent = data.time_stamp;
+            tableRow.appendChild(timeStamp);
+
+            const dayOrder = document.createElement("td");
+            dayOrder.textContent = data.day_order;
+            tableRow.appendChild(dayOrder);
+
+            const cate = document.createElement("td");
+            cate.textContent = data.category;
+            tableRow.appendChild(cate);
+
+            const atteSts = document.createElement("td");
+            atteSts.textContent = data.attendanceStatus;
+            tableRow.appendChild(atteSts);
+
+            // Append the row to the table body
+            popUpTableBody.appendChild(tableRow);
+          });
+        });
+      }
+
+      /*
+      "attendanceStatus": "Everything",
+        "time_stamp": "204751",
+        "date_stamp": "270924",
+        "day_order": "dont care",
+        "category": "enjoy"
+      <tr>
+            <td>Everything</td>
+            <td>204751</td>
+            <td>270924</td>
+            <td>dont care</td>
+            <td>enjoy</td>
+          </tr>
+      */
+
+      // Populate the table when the page loads
+      //   window.onload = populateTable;
+    </script>
+  </body>
+</html>

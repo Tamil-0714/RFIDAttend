@@ -1,0 +1,7 @@
+{
+  "attendanceStatus": "Present",
+  "time_stamp": "hhmmss",
+  "date_stamp": "ddmmyy",
+  "day_order": "A",
+  "category": "workshop event"
+}
